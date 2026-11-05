@@ -455,6 +455,7 @@ func (a *application) server() (func() error, func() error) {
 	}
 
 	mux.HandleFunc("/api/widgets/{widget}/{path...}", a.handleWidgetRequest)
+	mux.HandleFunc("/api/mac/{path...}", handleMacControls)
 	mux.HandleFunc("GET /api/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
@@ -493,7 +494,7 @@ func (a *application) server() (func() error, func() error) {
 	var absAssetsPath string
 	if a.Config.Server.AssetsPath != "" {
 		absAssetsPath, _ = filepath.Abs(a.Config.Server.AssetsPath)
-		assetsFS := fileServerWithCache(http.Dir(a.Config.Server.AssetsPath), 2*time.Hour)
+		assetsFS := fileServerWithCache(http.Dir(a.Config.Server.AssetsPath), 0)
 		mux.Handle("/assets/{path...}", http.StripPrefix("/assets/", assetsFS))
 	}
 

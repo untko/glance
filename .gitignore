@@ -1,5 +1,16 @@
-/assets
+/assets/*
+!/assets/user.css
 /build
 /playground
 /.idea
 /glance*.yml
+!/config/glance.yml
+/glance
+/glance_test
+*.log
+*.tar.gz
+*.backup
+.DS_Store
+.env
+
+

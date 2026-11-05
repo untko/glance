@@ -1,0 +1,126 @@
+- name: Desk Dock
+  hide-desktop-navigation: true
+  columns:
+    - size: small
+      widgets:
+        - type: hacker-news
+          limit: 4
+          collapse-after: 4
+          hide-header: true
+          css-class: news-single-line
+
+        - type: calendar
+          first-day-of-week: monday
+          hide-header: true
+          css-class: dock-calendar
+
+    - size: full
+      widgets:
+        - type: html
+          hide-header: true
+          css-class: clock-weather-widget
+          source: |
+            <div class="dock-clock-weather-panel">
+              <!-- Left: Full Sized Analog Clock -->
+              <div class="full-clock-box shrink-0">
+                <svg viewBox="0 0 100 100" class="analog-clock-svg">
+                  <circle cx="50" cy="50" r="47" fill="#0d0d12" stroke="#22222e" stroke-width="2"/>
+                  <!-- 12, 3, 6, 9 markers -->
+                  <line x1="50" y1="7" x2="50" y2="15" stroke="var(--color-primary)" stroke-width="2.8" stroke-linecap="round"/>
+                  <line x1="93" y1="50" x2="85" y2="50" stroke="var(--color-primary)" stroke-width="2.8" stroke-linecap="round"/>
+                  <line x1="50" y1="93" x2="50" y2="85" stroke="var(--color-primary)" stroke-width="2.8" stroke-linecap="round"/>
+                  <line x1="7" y1="50" x2="15" y2="50" stroke="var(--color-primary)" stroke-width="2.8" stroke-linecap="round"/>
+                  <!-- Intermediate hour dots -->
+                  <circle cx="71" cy="14" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="86" cy="29" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="86" cy="71" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="71" cy="86" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="29" cy="86" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="14" cy="71" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="14" cy="29" r="1.6" fill="#4c4c5e"/>
+                  <circle cx="29" cy="14" r="1.6" fill="#4c4c5e"/>
+                  <!-- Hands -->
+                  <line id="analog-hour" x1="50" y1="50" x2="50" y2="25" stroke="var(--color-text-highlight)" stroke-width="3.5" stroke-linecap="round"/>
+                  <line id="analog-minute" x1="50" y1="50" x2="50" y2="15" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round"/>
+                  <line id="analog-second" x1="50" y1="58" x2="50" y2="11" stroke="var(--color-negative)" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="50" cy="50" r="3.5" fill="var(--color-primary)"/>
+                </svg>
+              </div>
+
+              <!-- Subtle Divider Line -->
+              <div class="dock-v-divider shrink-0"></div>
+
+              <!-- Right: Day, Date, Weather -->
+              <div class="dock-meta-col grow min-width-0">
+                <div id="dock-digital-time" class="dock-digital-time color-highlight">--:--</div>
+                <div class="dock-date-row">
+                  <span id="dock-weekday" class="dock-weekday color-subdue">Friday</span>,
+                  <span id="dock-full-date" class="dock-full-date color-base">6 Nov 2026</span>
+                </div>
+                <div class="dock-weather-row">
+                  <span id="dock-weather-temp" class="dock-weather-temp color-primary">32°C</span>
+                  <span class="dock-weather-dot color-subdue">·</span>
+                  <span id="dock-weather-desc" class="dock-weather-desc color-subdue">Partly Cloudy</span>
+                </div>
+              </div>
+            </div>
+
+        - type: html
+          hide-header: true
+          css-class: below-line
+          source: |
+            <div class="dock-media-panel">
+              <!-- Volume Row: Icon + Level + Slider + Mini Stats + Buttons -->
+              <div class="media-row volume-row">
+                <div class="media-meta volume-meta">
+                  <span class="media-icon" id="vol-icon">🔊</span>
+                  <span id="vol-label" class="color-highlight vol-text">--%</span>
+                </div>
+
+                <!-- Interactive Volume Slider -->
+                <div class="vol-slider-wrap grow">
+                  <input type="range" min="0" max="100" id="vol-slider" class="vol-slider"
+                         oninput="window.isDraggingSlider=true; document.getElementById('vol-label').textContent=this.value+'%';"
+                         onchange="window.isDraggingSlider=false; dockApi('volume?set='+this.value);"
+                         ontouchend="window.isDraggingSlider=false; dockApi('volume?set='+this.value);">
+                </div>
+
+                <!-- Mini Stats (CPU & RAM) -->
+                <div class="mini-stats-badges shrink-0">
+                  <span class="stat-badge">CPU <b id="mini-cpu">--%</b></span>
+                  <span class="stat-badge">RAM <b id="mini-ram">--%</b></span>
+                </div>
+
+                <!-- Volume Step & Mute Buttons -->
+                <div class="dock-btn-group shrink-0">
+                  <button type="button" class="dock-btn btn-vol" onclick="dockApi('volume?action=down')">−</button>
+                  <button type="button" class="dock-btn btn-vol" onclick="dockApi('volume?action=up')">+</button>
+                  <button type="button" class="dock-btn btn-mute" id="mute-btn" onclick="dockApi('volume?action=mute')">Mute</button>
+                </div>
+              </div>
+
+              <div class="dock-divider"></div>
+
+              <!-- Spotify Card: 2x Big Album Art + (Track & Artist on top, Controls below) -->
+              <div class="spotify-card">
+                <!-- 2x Album Art Box -->
+                <div class="spot-art-box shrink-0">
+                  <img id="spot-art" class="spot-art-img" alt="Album Art" src="" style="display: none;">
+                  <div id="spot-art-placeholder" class="spot-art-placeholder">🎵</div>
+                </div>
+
+                <!-- Right Side: Title/Artist + Playback Buttons -->
+                <div class="spot-info-and-controls grow min-width-0">
+                  <div class="spot-text-wrap min-width-0">
+                    <div id="spot-title" class="color-highlight text-truncate spot-title-text">Connecting...</div>
+                    <div id="spot-artist" class="color-subdue text-truncate spot-artist-text">Spotify</div>
+                  </div>
+
+                  <div class="dock-btn-group spot-controls">
+                    <button type="button" class="dock-btn btn-track" onclick="dockApi('spotify?action=prev')">⏮</button>
+                    <button type="button" class="dock-btn btn-play" id="spot-play-btn" onclick="dockApi('spotify?action=playpause')">▶</button>
+                    <button type="button" class="dock-btn btn-track" onclick="dockApi('spotify?action=next')">⏭</button>
+                  </div>
+                </div>
+              </div>
+            </div>

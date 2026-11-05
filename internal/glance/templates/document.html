@@ -24,11 +24,188 @@
     <link rel="icon" type="{{ .App.Config.Branding.FaviconType }}" href="{{ .App.Config.Branding.FaviconURL }}" />
     <link rel="stylesheet" href='{{ .App.StaticAssetPath "css/bundle.css" }}'>
     <style id="theme-style">{{ .Request.Theme.CSS }}</style>
-    {{ if .App.Config.Theme.CustomCSSFile }}<link rel="stylesheet" href="{{ .App.Config.Theme.CustomCSSFile }}?v={{ .App.CreatedAt.Unix }}">{{ end }}
+    {{ if .App.Config.Theme.CustomCSSFile }}<link rel="stylesheet" href="{{ .App.Config.Theme.CustomCSSFile }}?v={{ .App.CreatedAt.UnixNano }}">{{ end }}
     {{ block "document-head-after" . }}{{ end }}
     {{ if .App.Config.Document.Head }}{{ .App.Config.Document.Head }}{{ end }}
 </head>
 <body>
 {{ template "document-body" . }}
+
+<script>
+window.dockApi = function(endpoint) {
+  fetch('/api/mac/' + endpoint)
+    .then(r => r.json())
+    .then(updateDockUI)
+    .catch(console.error);
+};
+
+window.isDraggingSlider = false;
+
+function updateDockUI(data) {
+  if (!data) return;
+  const volLabel = document.getElementById('vol-label');
+  const volSlider = document.getElementById('vol-slider');
+  const volIcon = document.getElementById('vol-icon');
+  const muteBtn = document.getElementById('mute-btn');
+  if (volLabel) volLabel.textContent = data.volume + '%';
+  if (volSlider && !window.isDraggingSlider) volSlider.value = data.volume;
+  if (data.muted) {
+    if (volIcon) volIcon.textContent = '🔇';
+    if (muteBtn) muteBtn.classList.add('is-muted');
+  } else {
+    if (volIcon) volIcon.textContent = data.volume > 50 ? '🔊' : (data.volume > 0 ? '🔉' : '🔈');
+    if (muteBtn) muteBtn.classList.remove('is-muted');
+  }
+
+  // Mini Stats
+  if (data.stats) {
+    const cpuEl = document.getElementById('mini-cpu');
+    const ramEl = document.getElementById('mini-ram');
+    if (cpuEl) cpuEl.textContent = data.stats.cpu + '%';
+    if (ramEl) ramEl.textContent = data.stats.ram + '%';
+  }
+
+  // Spotify
+  const spot = data.spotify;
+  const titleEl = document.getElementById('spot-title');
+  const artistEl = document.getElementById('spot-artist');
+  const playBtn = document.getElementById('spot-play-btn');
+  const artImg = document.getElementById('spot-art');
+  const artPlaceholder = document.getElementById('spot-art-placeholder');
+
+  if (spot) {
+    if (spot.state === 'offline') {
+      if (titleEl) titleEl.textContent = 'Spotify Offline';
+      if (artistEl) artistEl.textContent = 'Tap ▶ to launch';
+      if (playBtn) playBtn.textContent = '▶';
+      if (artImg) artImg.style.display = 'none';
+      if (artPlaceholder) artPlaceholder.style.display = 'flex';
+    } else {
+      if (titleEl) titleEl.textContent = spot.track || 'Playing';
+      if (artistEl) artistEl.textContent = spot.artist || 'Spotify';
+      if (playBtn) playBtn.textContent = (spot.state === 'playing') ? '⏸' : '▶';
+      if (spot.artwork) {
+        if (artImg) {
+          if (artImg.src !== spot.artwork) artImg.src = spot.artwork;
+          artImg.style.display = 'block';
+        }
+        if (artPlaceholder) artPlaceholder.style.display = 'none';
+      } else {
+        if (artImg) artImg.style.display = 'none';
+        if (artPlaceholder) artPlaceholder.style.display = 'flex';
+      }
+    }
+  }
+}
+
+setInterval(() => {
+  if (document.getElementById('vol-label')) {
+    fetch('/api/mac/status')
+      .then(r => r.json())
+      .then(updateDockUI)
+      .catch(() => {});
+  }
+}, 2000);
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => window.dockApi && window.dockApi('status'), 300);
+});
+setInterval(() => {
+  if (document.getElementById('vol-label') && document.getElementById('vol-label').textContent === '--%') {
+    window.dockApi && window.dockApi('status');
+  }
+}, 1000);
+
+function updateAnalogClock() {
+  const now = new Date();
+  const ms = now.getMilliseconds();
+  const sec = now.getSeconds() + ms / 1000;
+  const min = now.getMinutes() + sec / 60;
+  const hr = (now.getHours() % 12) + min / 60;
+
+  const hrEl = document.getElementById('analog-hour');
+  const minEl = document.getElementById('analog-minute');
+  const secEl = document.getElementById('analog-second');
+  if (hrEl) hrEl.setAttribute('transform', `rotate(${hr * 30} 50 50)`);
+  if (minEl) minEl.setAttribute('transform', `rotate(${min * 6} 50 50)`);
+  if (secEl) secEl.setAttribute('transform', `rotate(${sec * 6} 50 50)`);
+
+  const digTime = document.getElementById('dock-digital-time');
+  const weekday = document.getElementById('dock-weekday');
+  const fullDate = document.getElementById('dock-full-date');
+  if (digTime) {
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    digTime.textContent = `${h}:${m}`;
+  }
+  if (weekday) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    weekday.textContent = days[now.getDay()];
+  }
+  if (fullDate) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    fullDate.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  }
+}
+
+function updateLiveWeather() {
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=13.7563&longitude=100.5018&current=temperature_2m,apparent_temperature,weather_code&timezone=auto')
+    .then(r => r.json())
+    .then(data => {
+      if (!data || !data.current) return;
+      const codeMap = {
+        0: 'Clear', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
+        45: 'Fog', 48: 'Rime Fog', 51: 'Light Drizzle', 53: 'Drizzle',
+        55: 'Dense Drizzle', 61: 'Slight Rain', 63: 'Rain', 65: 'Heavy Rain',
+        80: 'Rain Showers', 95: 'Thunderstorm'
+      };
+      const temp = Math.round(data.current.temperature_2m);
+      const desc = codeMap[data.current.weather_code] || 'Partly Cloudy';
+      const elTemp = document.getElementById('dock-weather-temp');
+      const elDesc = document.getElementById('dock-weather-desc');
+      if (elTemp) elTemp.textContent = temp + '°C';
+      if (elDesc) elDesc.textContent = desc;
+    })
+    .catch(() => {});
+}
+updateLiveWeather();
+setInterval(updateLiveWeather, 900000);
+
+setInterval(updateAnalogClock, 1000);
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(updateAnalogClock, 300);
+});
+setInterval(() => {
+  if (document.getElementById('analog-hour') && !document.getElementById('dock-digital-time').textContent.includes(':')) {
+    updateAnalogClock();
+  }
+}, 500);
+
+// --- OLED Burn-In Protection ---
+// 1. Pixel Shifter: shifts .page-columns by ±3px every 60 seconds
+function shiftPixels() {
+  const container = document.querySelector('.page-columns');
+  if (!container) return;
+  const offsets = [-3, -2, -1, 0, 1, 2, 3];
+  const shiftX = offsets[Math.floor(Math.random() * offsets.length)];
+  const shiftY = offsets[Math.floor(Math.random() * offsets.length)];
+  container.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+}
+setInterval(shiftPixels, 60000);
+
+// 2. Ambient Idle Auto-Dimmer: dims screen after 2 minutes of idle
+let dockIdleTimer = null;
+function resetDockIdleTimer() {
+  document.body.classList.remove('ambient-dimmed');
+  clearTimeout(dockIdleTimer);
+  dockIdleTimer = setTimeout(() => {
+    document.body.classList.add('ambient-dimmed');
+  }, 120000); // 2 minutes
+}
+['touchstart', 'touchmove', 'touchend', 'click', 'mousemove', 'scroll', 'keydown'].forEach(evt => {
+  window.addEventListener(evt, resetDockIdleTimer, { passive: true });
+});
+resetDockIdleTimer();
+</script>
 </body>
 </html>

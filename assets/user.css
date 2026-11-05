@@ -1,0 +1,449 @@
+/* ==========================================================================
+   Glance Custom CSS: Pixel 4 Desk Dock (OLED Frameless Floating Layout)
+   ========================================================================== */
+
+/* OLED Pure Black Theme - No Backgrounds */
+:root {
+    --color-background: #000000;
+    --color-widget-background: transparent;
+    --color-widget-content-border: transparent;
+    --color-card-border: transparent;
+}
+
+/* Hide widget title headers everywhere in the Desk Dock */
+.widget-header {
+    display: none !important;
+}
+
+@media (orientation: landscape) and (max-height: 550px) {
+    /* 1. Global compact variables */
+    :root {
+        --widget-gap: 8px;
+        --widget-content-vertical-padding: 4px;
+        --widget-content-horizontal-padding: 6px;
+        --content-bounds-padding: 6px;
+        --border-radius: 6px;
+    }
+
+    body {
+        font-size: 1.15rem;
+        line-height: 1.35;
+        background-color: #000000 !important;
+    }
+
+    /* 2. Generous top touch/drag runway to collapse Chrome URL bar */
+    .page-columns {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 16px !important;
+        align-items: flex-start;
+        padding-top: 140px !important;    /* Runway to collapse URL bar */
+        padding-bottom: 140px !important;
+        transition: transform 1.5s ease-in-out;
+    }
+
+    /* OLED Burn-in Protection: Ambient idle dimming */
+    body.ambient-dimmed .page-columns {
+        filter: brightness(0.62);
+        transition: filter 2.5s ease;
+    }
+
+    body:not(.ambient-dimmed) .page-columns {
+        filter: brightness(1);
+        transition: filter 0.3s ease;
+    }
+
+    /* Remove backgrounds from all widgets & containers */
+    .widget,
+    .widget-content,
+    .widget-type-calendar,
+    .widget-type-hacker-news,
+    .news-single-line,
+    .dock-clock-weather-panel,
+    .dock-media-panel {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Column 1 (Left, 46%): Hacker News (Top) + Calendar (Bottom) */
+    .page-column-small {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        flex: 0 0 46% !important;
+        width: 46% !important;
+        max-width: 46% !important;
+        min-width: 0 !important;
+    }
+
+    /* Column 2 (Right, 54%): Full Clock & Weather (Top) + Media Panel (Bottom) */
+    .page-column-full {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        flex: 1 1 54% !important;
+        width: 54% !important;
+        min-width: 0 !important;
+    }
+
+    /* Hide mobile bottom navigation pills */
+    .mobile-navigation,
+    .mobile-navigation-offset {
+        display: none !important;
+    }
+
+    /* ==========================================================================
+       QUADRANT 1 (Top-Left): 1-Line News Headlines
+       ========================================================================== */
+    .news-single-line {
+        height: 145px !important;
+        margin-bottom: 0 !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .news-single-line .list-horizontal-text,
+    .news-single-line .forum-post-list-thumbnail,
+    .news-single-line .forum-post-tags-container,
+    .news-single-line .collapsible-button {
+        display: none !important;
+    }
+
+    .news-single-line .widget-content {
+        padding: 4px 6px !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .news-single-line ul.list {
+        gap: 6px !important;
+    }
+
+    .news-single-line .size-title-dynamic {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        font-size: 1.15rem !important;
+        line-height: 1.4 !important;
+    }
+
+    /* ==========================================================================
+       QUADRANT 2 (Top-Right): Full Sized Analog Clock | Day, Date, Weather
+       ========================================================================== */
+    .clock-weather-widget {
+        height: 145px !important;
+        box-sizing: border-box !important;
+        margin-bottom: 0 !important;
+    }
+
+    .dock-clock-weather-panel {
+        height: 145px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 16px !important;
+        padding: 4px 6px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Full Sized Clock Face (120px) */
+    .full-clock-box {
+        width: 120px !important;
+        height: 120px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .analog-clock-svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.8));
+    }
+
+    /* Subtle vertical divider */
+    .dock-v-divider {
+        width: 1px !important;
+        height: 85px !important;
+        background: #252533 !important;
+        opacity: 0.6 !important;
+    }
+
+    /* Right metadata column */
+    .dock-meta-col {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        min-width: 0 !important;
+    }
+
+    .dock-digital-time {
+        font-size: 2.1rem !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.02em;
+        line-height: 1 !important;
+    }
+
+    .dock-date-row {
+        font-size: 1.15rem !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    .dock-weekday {
+        font-weight: 600;
+    }
+
+    .dock-full-date {
+        font-weight: 400;
+    }
+
+    .dock-weather-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        font-size: 1.15rem !important;
+        line-height: 1.2 !important;
+    }
+
+    .dock-weather-temp {
+        font-weight: 700 !important;
+        font-size: 1.35rem !important;
+        line-height: 1 !important;
+    }
+
+    .dock-weather-dot {
+        opacity: 0.5;
+    }
+
+    .dock-weather-desc {
+        font-weight: 500;
+    }
+
+    /* ==========================================================================
+       QUADRANT 3 (Bottom-Left): Calendar (Borderless)
+       ========================================================================== */
+    .widget-type-calendar {
+        margin-bottom: 0 !important;
+    }
+
+    .widget-type-calendar .widget-content {
+        padding: 4px 6px !important;
+    }
+
+    .widget-type-calendar .calendar-date {
+        padding: 0.3rem 0 !important;
+        font-size: 1.05rem !important;
+    }
+
+    /* ==========================================================================
+       QUADRANT 4 (Bottom-Right): Volume Slider, Mini Stats & Spotify with Art
+       ========================================================================== */
+    .dock-media-panel {
+        padding: 4px 6px !important;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .media-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .media-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .media-icon {
+        font-size: 1.3rem;
+    }
+
+    .vol-text {
+        font-size: 1.25rem;
+        font-weight: 600;
+        min-width: 44px;
+    }
+
+    /* Volume Slider Track */
+    .vol-slider-wrap {
+        display: flex;
+        align-items: center;
+        margin: 0 4px;
+        min-width: 60px;
+    }
+
+    .vol-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: #1c1c24;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .vol-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        box-shadow: 0 0 6px rgba(0,0,0,0.8);
+        cursor: pointer;
+    }
+
+    /* Mini Stats */
+    .mini-stats-badges {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 1.05rem;
+    }
+
+    .stat-badge {
+        background: transparent;
+        border: 1px solid #20202a;
+        padding: 3px 6px;
+        border-radius: 4px;
+        color: var(--color-text-subdue);
+        white-space: nowrap;
+        font-size: 1.0rem;
+    }
+
+    .stat-badge b {
+        color: var(--color-text-highlight);
+        font-weight: 600;
+    }
+
+    /* Album Art: 82px */
+    .spotify-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 2px;
+    }
+
+    .spot-art-box {
+        width: 82px;
+        height: 82px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #101014;
+        border: 1px solid #202028;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+        flex-shrink: 0;
+    }
+
+    .spot-art-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .spot-art-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: var(--color-text-subdue);
+    }
+
+    .spot-info-and-controls {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 82px;
+        min-width: 0;
+    }
+
+    .spot-title-text {
+        font-size: 1.35rem !important;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .spot-artist-text {
+        font-size: 1.15rem !important;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+    .spot-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dock-btn-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .dock-btn {
+        background: #14141c;
+        border: 1px solid #242430;
+        color: var(--color-text-highlight);
+        border-radius: var(--border-radius);
+        padding: 4px 10px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s, transform 0.1s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 36px;
+    }
+
+    .dock-btn:active {
+        background: #2a2a3a;
+        transform: scale(0.93);
+    }
+
+    .dock-btn.btn-vol {
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .dock-btn.btn-mute {
+        font-size: 1.05rem;
+        padding: 4px 10px;
+    }
+
+    .dock-btn.btn-mute.is-muted {
+        color: var(--color-negative);
+        border-color: var(--color-negative);
+    }
+
+    .dock-btn.btn-play {
+        color: var(--color-primary);
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+
+    .dock-divider {
+        height: 1px;
+        background: #1c1c28;
+        margin: 2px 0;
+        opacity: 0.5;
+    }
+}
